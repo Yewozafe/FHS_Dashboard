@@ -1,0 +1,406 @@
+---
+title: "WB Farmer Hotline Screening Phone Survey"
+author: "Frontieri consultancy"
+
+date: "[Feb 12, 2026 | 01:00 AM]"
+
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: row
+    vertical_layout: fill
+    
+    logo: logo.png
+    
+---
+
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(haven)
+library(plyr)
+library(tidyverse)
+library(dplyr)
+library(lubridate)
+library(highcharter)
+library(plotly)
+library(DT)
+library(stringr)
+library(ggplot2)
+library(viridis)
+library(hrbrthemes)
+```
+
+```{r}
+data <- read_dta(
+  "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/Pilot_Farmer_Hotline_Screening_Phone_Survey_WIDE.dta"
+)
+
+data <- data %>% mutate(across(where(is.labelled), as_factor))
+
+data <- data %>%
+  rename(
+    region        = region_preload,
+    enum_name     = enumerator_name,
+    marital_statu = q1_2_d
+  ) %>%
+  select(-consent) %>%
+  rename(consent = consent1)
+
+data <- data %>%
+  mutate(
+    enum_name = str_replace_all(
+      enum_name,
+      c(
+        "Abidulahi mohammed" = "Abidulahi",
+        "Addis Worku" = "Addis",
+        "Aklilu Zewde Birhane" = "Aklilu",
+        "Atakilit Tadesse" = "Atakilit",
+        "Bruktawit Molla" = "Bruktawit",
+        "Daniel Abebaw" = "Daniel",
+        "Eyerus halfom" = "Eyerus",
+        "Hilariy Girmay" = "Hilariy",
+        "Kabtamu Alemayehu" = "Kabtamu",
+        "Kalkidan Wondatir" = "Kalkidan",
+        "Mariyam Gudeta" = "Mariyam",
+        "Ruth Asfaw" = "Ruth",
+        "Shewakena Damitew" = "Shewakena",
+        "Sitota G/melak" = "Sitota",
+        "Tadele Ejo" = "Tadele",
+        "Tena tesfaye" = "Tena",
+        "Tirsit Seyoum" = "Tirsit",
+        "Tirunesh Ajema" = "Tirunesh",
+        "Urgessa Mekonnen" = "Urgessa",
+        "Fikadu Thomas" = "Fikadu",
+        "Yakob Debela" = "Yakob"
+      )
+    )
+  )
+
+```
+
+HOME
+=====================================
+Row
+-----------------------------------------------------------------------
+
+
+### TOTAL SYNCED PILOT INTERVIEWS
+
+```{r}
+total_interview<-nrow(data)
+valueBox(total_interview, icon = "fa-bar-chart")
+```
+
+## Column
+
+### NO. OF INTERVIEWS BY ENUMERATOR {data-width="600"}
+
+```{r Endline}
+Abidulahi <- data %>% filter(enum_name == "Abidulahi") %>% nrow()
+Addis <- data %>% filter(enum_name == "Addis") %>% nrow()
+Aklilu <- data %>% filter(enum_name == "Aklilu") %>% nrow()
+Atakilit <- data %>% filter(enum_name == "Atakilit") %>% nrow()
+Bruktawit <- data %>% filter(enum_name == "Bruktawit") %>% nrow()
+Daniel <- data %>% filter(enum_name == "Daniel") %>% nrow()
+Eyerus <- data %>% filter(enum_name == "Eyerus") %>% nrow()
+Hilariy <- data %>% filter(enum_name == "Hilariy") %>% nrow()
+Kabtamu <- data %>% filter(enum_name == "Kabtamu") %>% nrow()
+Kalkidan <- data %>% filter(enum_name == "Kalkidan") %>% nrow()
+Mariyam <- data %>% filter(enum_name == "Mariyam") %>% nrow()
+Ruth <- data %>% filter(enum_name == "Ruth") %>% nrow()
+Shewakena <- data %>% filter(enum_name == "Shewakena") %>% nrow()
+Sitota <- data %>% filter(enum_name == "Sitota") %>% nrow()
+Tadele <- data %>% filter(enum_name == "Tadele") %>% nrow()
+Tena <- data %>% filter(enum_name == "Tena") %>% nrow()
+Tirsit <- data %>% filter(enum_name == "Tirsit") %>% nrow()
+Tirunesh <- data %>% filter(enum_name == "Tirunesh") %>% nrow()
+Urgessa <- data %>% filter(enum_name == "Urgessa") %>% nrow()
+Fikadu <- data %>% filter(enum_name == "Fikadu") %>% nrow()
+Yakob <- data %>% filter(enum_name == "Yakob") %>% nrow()
+
+data %>% 
+  dplyr::filter(!is.na(enum_name)) %>% 
+  dplyr::count(enum_name) %>% 
+  dplyr::arrange(desc(n)) %>% 
+  hchart(
+    "column",
+    hcaes(x = enum_name, y = n)
+  ) %>%
+  hc_title(text = "Number of Interviews Completed by Enumerator") %>%
+  hc_xAxis(title = list(text = "Enumerator")) %>%
+  hc_yAxis(title = list(text = "Total Interviews")) %>%
+  hc_tooltip(pointFormat = "<b>{point.y}</b> interviews") %>%
+  hc_plotOptions(
+    column = list(
+      dataLabels = list(enabled = TRUE)
+    )
+  ) %>%
+  hc_colors(c(
+    "#2ECC71", "#3498DB", "#F1C40F", "#E67E22",
+    "#9B59B6", "#1ABC9C", "#E91E63", "#34495E"
+  ))
+
+
+```
+
+
+### SYNCED INTERVIEWS BY CONSENT STATUS {data-width=400}
+
+```{r }
+
+data %>% 
+  filter(!is.na(consent)) %>%
+  count(consent) %>%
+  arrange(desc(n)) %>%
+  hchart(
+    "column",
+    hcaes(x = consent, y = n)
+  ) %>%
+  hc_title(text = "Consent Status of Respondents") %>%
+  hc_xAxis(title = list(text = "Consent")) %>%
+  hc_yAxis(title = list(text = "Number of Respondents")) %>%
+  hc_plotOptions(
+    column = list(
+      borderRadius = 6,
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.y}",
+        style = list(fontWeight = "bold")
+      )
+    )
+  ) %>%
+  hc_tooltip(pointFormat = "<b>{point.y}</b> respondents") %>%
+  hc_colors(
+    c(
+      "Yes" = "#2E7D32",
+      "No"  = "#D32F2F" 
+    )
+  )
+
+```
+
+## Column
+
+### NO. OF INTERVIEWS  BY REGION {data-width=300}
+
+```{r }
+data %>% 
+  dplyr::count(region) %>%
+  arrange(-n) %>% 
+  hchart('bar', hcaes(x = 'region', y = 'n'), color_stops(n=4, colors = c("#F65A83", "#FF1E00", "#21E1E1", "#224B0C")))
+```
+
+### NO. OF INTERVIEWS DONE BY DATE {data-width=400}
+
+```{r}
+data %>%
+  mutate(
+    SubmissionDate = as.Date(SubmissionDate, format = "%d%b%Y")
+  ) %>%
+  count(SubmissionDate) %>%
+  arrange(SubmissionDate) %>%
+  hchart(
+    "line",
+    hcaes(SubmissionDate, n)
+  ) %>%
+  hc_title(text = "Interviews Over Interview Submission Date") %>%
+  hc_xAxis(type = "datetime") %>%
+  hc_colors("#2E7D32")
+
+```
+
+### NO. OF INTERVIEWS  BY GENDER {data-width=300}
+
+```{r }
+data %>% 
+  filter(!is.na(gender)) %>%
+  count(gender) %>%
+  mutate(
+    percent = n / sum(n) * 100
+  ) %>%
+  hchart(
+    "pie",
+    hcaes(x = gender, y = n)
+  ) %>%
+  hc_plotOptions(
+    pie = list(
+      innerSize = "55%",
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.name}: {point.y} ({point.percentage:.1f}%)",
+        style = list(fontWeight = "bold", fontSize = "12px")
+      )
+    )
+  ) %>%
+  hc_tooltip(
+    pointFormat = "<b>{point.y}</b> interviews<br>{point.percentage:.1f}%"
+  ) %>%
+  hc_colors(
+    c(
+      "Male"   = "#2E7D32", 
+      "Female" = "#EC407A"
+    )
+  )
+```
+
+
+### RESPONDENTS BY AGE {data-width=400}
+
+```{r }
+data %>% 
+  dplyr::filter(!is.na(age)) %>%
+  dplyr::count(age) %>%
+  arrange(age) %>% 
+  hchart(
+    "line",
+    hcaes(x = age, y = n)
+  ) %>%
+  hc_title(text = "Respondents by Age") %>%
+  hc_xAxis(title = list(text = "Age")) %>%
+  hc_yAxis(title = list(text = "Number of Respondents")) %>%
+  hc_colors("#2E7D32")
+
+```
+
+MORE GRAPH
+=====================================
+Row
+-----------------------------------------------------------------------
+
+### NO. OF INTERVIEWS BY AGE GROUP  {data-width=400}
+
+```{r }
+library(dplyr)
+library(highcharter)
+
+data %>%
+  filter(!is.na(age)) %>%
+  mutate(
+    age = as.numeric(age),
+    age_group = cut(
+      age,
+      breaks = c(15, 24, 34, 44, 54, 64, Inf),
+      labels = c("15–24", "25–34", "35–44", "45–54", "55–64", "65+")
+    )
+  ) %>%
+  count(age_group) %>%
+  hchart(
+    "pie",
+    hcaes(x = age_group, y = n)
+  ) %>%
+  hc_title(text = "Respondents by Age Group") %>%
+  hc_plotOptions(
+    pie = list(
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.name}: {point.percentage:.1f}%"
+      )
+    )
+  ) %>%
+  hc_colors(c("#2E7D32", "#F9A825", "#EC407A", "#21E1E1", "#FF9800", "#9E9E9E"))
+
+
+```
+
+### REPORT BY MAIN MOBILE USER {data-width=400}
+
+```{r }
+data %>% 
+  dplyr::filter(!is.na(q1_2_a)) %>% 
+  dplyr::count(q1_2_a) %>%
+  dplyr::mutate(
+    percent = round(n / sum(n) * 100, 1),
+    label = paste0(n, " (", percent, "%)")
+  ) %>%
+  hchart(
+    "pie",
+    hcaes(
+      x = q1_2_a,
+      y = n
+    )
+  ) %>%
+  hc_title(text = "Are you the main user of this mobile phone number?") %>%
+  hc_tooltip(
+    pointFormat = "<b>{point.y}</b> respondents<br>{point.percentage:.1f}%"
+  ) %>%
+  hc_plotOptions(
+    pie = list(
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.name}: {point.y} ({point.percentage:.1f}%)"
+      )
+    )
+  ) %>%
+  hc_colors(c("#2ECC71", "#E91ED3"))
+
+```
+
+Column 
+-----------------------------------------------------------------------
+
+###  EDUCATIONAL STATUSE OF RESPONDENTS {data-width=400}
+
+```{r }
+data %>% 
+  filter(!is.na(q2_1_i)) %>%
+  count(q2_1_i) %>%
+  arrange(desc(n)) %>% 
+  hchart(
+    "column",
+    hcaes(x = q2_1_i, y = n)
+  ) %>%
+  hc_title(text = "Education Status of Respondents") %>%
+  hc_xAxis(title = list(text = "Attended School")) %>%
+  hc_yAxis(title = list(text = "Number of Respondents")) %>%
+  hc_plotOptions(
+    column = list(
+      borderRadius = 6,
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.y}",
+        style = list(fontWeight = "bold")
+      )
+    )
+  )
+
+```
+
+### RESPONDENT'S CHILD OWNERSHIP STATUS  {data-width=400}
+
+```{r }
+library(dplyr)
+library(highcharter)
+
+data %>% 
+  filter(!is.na(q2_1_g)) %>%        # remove missing FIRST
+  count(q2_1_g) %>%
+  arrange(desc(n)) %>% 
+  hchart(
+    "column",
+    hcaes(x = q2_1_g, y = n)
+  ) %>%
+  hc_title(text = "Do You Have Any Child?") %>%
+  hc_xAxis(title = list(text = "Response")) %>%
+  hc_yAxis(title = list(text = "Number of Respondents")) %>%
+  hc_plotOptions(
+    column = list(
+      borderRadius = 6,
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.y}",
+        style = list(fontWeight = "bold")
+      )
+    )
+  ) %>%
+  hc_tooltip(pointFormat = "<b>{point.y}</b> respondents") %>%
+  hc_colors(
+    c(
+      "#2E7D32",  # Green
+      "#EC407A",  # Pink
+      "#F9A825",  # Yellow
+      "#21E1E1"   # Cyan
+    )
+  )
+
+```
+
