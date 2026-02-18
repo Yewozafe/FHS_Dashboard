@@ -2,7 +2,7 @@
 title: "WB Farmer Hotline Screening Phone Survey"
 author: "Frontieri consultancy"
 
-date: "[Feb 12, 2026 | 01:00 AM]"
+date: "[Feb 18, 2026 | 08:00 AM]"
 
 output: 
   flexdashboard::flex_dashboard:
@@ -29,15 +29,83 @@ library(ggplot2)
 library(viridis)
 library(hrbrthemes)
 ```
+```{r}
+#Phone Survey
+dataps <- read_dta(
+  "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/ATI_Farmer_Hotline_phone_survey_500_Callers_WIDE.dta"
+)
+
+dataps <- dataps %>% mutate(across(where(is.labelled), as_factor))
+
+dataps <- dataps %>%
+  rename(
+    region        = region_preload,
+    supervisor_name = supervisor,
+    marital_statu = q1_2_d
+  ) %>%
+  select(-consent) %>%
+  rename(consent = consent1)
+
+dataps <- dataps %>%
+  mutate(
+    supervisor_name = str_replace_all(
+      supervisor_name,
+      c(
+        "Shambel Awgachew" = "Shambel",
+        "Jemila Umar" = "Jemila",
+        "Fikiru Yigezu" = "Fikiru",
+        "Gachano Gemechu" = "Gachano",
+        "Gashayeneh Deribe" = "Gashayeneh",
+        "Misrak Birhanu" = "Misrak"
+      )
+    )
+  )
+
+```
 
 ```{r}
-data <- read_dta(
+#Backcheck Survey
+databc <- read_dta(
+  "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/Back_Check_Survey_500_Callers_WIDE.dta"
+)
+
+databc <- databc %>% mutate(across(where(is.labelled), as_factor))
+
+databc <- databc %>%
+  rename(
+    region        = region_preload,
+    supervisor_name = supervisor,
+    marital_statu = q1_2_d
+  ) %>%
+  select(-consent) %>%
+  rename(consent = consent1)
+
+databc <- databc %>%
+  mutate(
+    supervisor_name = str_replace_all(
+      supervisor_name,
+      c(
+        "Shambel Awgachew" = "Shambel",
+        "Jemila Umar" = "Jemila",
+        "Fikiru Yigezu" = "Fikiru",
+        "Gachano Gemechu" = "Gachano",
+        "Gashayeneh Deribe" = "Gashayeneh",
+        "Misrak Birhanu" = "Misrak"
+      )
+    )
+  )
+  
+```
+
+```{r}
+#Pilot Survey
+datapis <- read_dta(
   "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/Pilot_Farmer_Hotline_Screening_Phone_Survey_WIDE.dta"
 )
 
-data <- data %>% mutate(across(where(is.labelled), as_factor))
+datapis <- datapis %>% mutate(across(where(is.labelled), as_factor))
 
-data <- data %>%
+datapis <- datapis %>%
   rename(
     region        = region_preload,
     enum_name     = enumerator_name,
@@ -46,7 +114,7 @@ data <- data %>%
   select(-consent) %>%
   rename(consent = consent1)
 
-data <- data %>%
+datapis <- datapis %>%
   mutate(
     enum_name = str_replace_all(
       enum_name,
@@ -78,57 +146,56 @@ data <- data %>%
 
 ```
 
-HOME
+ATA PHONE SURVEY
 =====================================
 Row
 -----------------------------------------------------------------------
 
 
-### TOTAL SYNCED PILOT INTERVIEWS
+### TOTAL SYNCED ATI PHONE SURVEY INTERVIEWS
 
 ```{r}
-total_interview<-nrow(data)
+total_interview<-nrow(dataps)
+valueBox(total_interview, icon = "fa-bar-chart")
+```
+
+### TOTAL SYNCED ATI PILOT INTERVIEWS
+
+```{r}
+total_interview<-nrow(datapis)
+valueBox(total_interview, icon = "fa-bar-chart")
+```
+
+### TOTAL SYNCED ATI BACKCHECK INTERVIEWS
+
+```{r}
+total_interview<-nrow(databc)
 valueBox(total_interview, icon = "fa-bar-chart")
 ```
 
 ## Column
 
-### NO. OF INTERVIEWS BY ENUMERATOR {data-width="600"}
+### NO. OF SYNCED PHONE INTERVIEWS BY SUPERVISORS {data-width="400"}
 
-```{r Endline}
-Abidulahi <- data %>% filter(enum_name == "Abidulahi") %>% nrow()
-Addis <- data %>% filter(enum_name == "Addis") %>% nrow()
-Aklilu <- data %>% filter(enum_name == "Aklilu") %>% nrow()
-Atakilit <- data %>% filter(enum_name == "Atakilit") %>% nrow()
-Bruktawit <- data %>% filter(enum_name == "Bruktawit") %>% nrow()
-Daniel <- data %>% filter(enum_name == "Daniel") %>% nrow()
-Eyerus <- data %>% filter(enum_name == "Eyerus") %>% nrow()
-Hilariy <- data %>% filter(enum_name == "Hilariy") %>% nrow()
-Kabtamu <- data %>% filter(enum_name == "Kabtamu") %>% nrow()
-Kalkidan <- data %>% filter(enum_name == "Kalkidan") %>% nrow()
-Mariyam <- data %>% filter(enum_name == "Mariyam") %>% nrow()
-Ruth <- data %>% filter(enum_name == "Ruth") %>% nrow()
-Shewakena <- data %>% filter(enum_name == "Shewakena") %>% nrow()
-Sitota <- data %>% filter(enum_name == "Sitota") %>% nrow()
-Tadele <- data %>% filter(enum_name == "Tadele") %>% nrow()
-Tena <- data %>% filter(enum_name == "Tena") %>% nrow()
-Tirsit <- data %>% filter(enum_name == "Tirsit") %>% nrow()
-Tirunesh <- data %>% filter(enum_name == "Tirunesh") %>% nrow()
-Urgessa <- data %>% filter(enum_name == "Urgessa") %>% nrow()
-Fikadu <- data %>% filter(enum_name == "Fikadu") %>% nrow()
-Yakob <- data %>% filter(enum_name == "Yakob") %>% nrow()
+```{r }
+Shambel <- dataps %>% filter(supervisor_name == "Shambel") %>% nrow()
+Addis <- dataps %>% filter(supervisor_name == "Addis") %>% nrow()
+Fikiru <- dataps %>% filter(supervisor_name == "Fikiru") %>% nrow()
+Gachano <- dataps %>% filter(supervisor_name == "Gachano") %>% nrow()
+Gashayeneh <- dataps %>% filter(supervisor_name == "Gashayeneh") %>% nrow()
+Misrak <- dataps %>% filter(supervisor_name == "Misrak") %>% nrow()
 
-data %>% 
-  dplyr::filter(!is.na(enum_name)) %>% 
-  dplyr::count(enum_name) %>% 
+dataps %>% 
+  dplyr::filter(!is.na(supervisor_name)) %>% 
+  dplyr::count(supervisor_name) %>% 
   dplyr::arrange(desc(n)) %>% 
   hchart(
     "column",
-    hcaes(x = enum_name, y = n)
+    hcaes(x = supervisor_name, y = n)
   ) %>%
-  hc_title(text = "Number of Interviews Completed by Enumerator") %>%
-  hc_xAxis(title = list(text = "Enumerator")) %>%
-  hc_yAxis(title = list(text = "Total Interviews")) %>%
+  hc_title(text = "Number of Interviews synced by teams") %>%
+  hc_xAxis(title = list(text = "Supervisors")) %>%
+  hc_yAxis(title = list(text = "Total Interviews Synced")) %>%
   hc_tooltip(pointFormat = "<b>{point.y}</b> interviews") %>%
   hc_plotOptions(
     column = list(
@@ -144,11 +211,11 @@ data %>%
 ```
 
 
-### SYNCED INTERVIEWS BY CONSENT STATUS {data-width=400}
+### SYNCED PHONE INTERVIEWS BY CONSENT STATUS {data-width=400}
 
 ```{r }
 
-data %>% 
+dataps %>% 
   filter(!is.na(consent)) %>%
   count(consent) %>%
   arrange(desc(n)) %>%
@@ -178,22 +245,62 @@ data %>%
   )
 
 ```
-
-## Column
-
-### NO. OF INTERVIEWS  BY REGION {data-width=300}
+### TOTAL NO. OF SYNCED PHONE SURVEY INTERVIEWS BY REGION {data-width=700}
 
 ```{r }
-data %>% 
+dataps %>% 
   dplyr::count(region) %>%
   arrange(-n) %>% 
   hchart('bar', hcaes(x = 'region', y = 'n'), color_stops(n=4, colors = c("#F65A83", "#FF1E00", "#21E1E1", "#224B0C")))
 ```
 
-### NO. OF INTERVIEWS DONE BY DATE {data-width=400}
+## Column
+
+### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY SPLIT GROUP {data-width=300}
+
+```{r }
+library(dplyr)
+library(highcharter)
+
+dataps %>% 
+  mutate(
+    split_group = recode(
+      as.character(split_group),
+      "1" = "Group A",
+      "2" = "Group B",
+      "3" = "Group C"
+    )
+  ) %>% 
+  count(split_group) %>% 
+  hchart(
+    type = "pie",
+    hcaes(
+      x = split_group,
+      y = n,
+      color = split_group
+    ),
+    colors = group_colors
+  ) %>% 
+  hc_plotOptions(
+    pie = list(
+      innerSize = "60%",
+      dataLabels = list(
+        enabled = TRUE,
+        format = "<b>{point.name}</b><br>{point.y} ({point.percentage:.1f}%)"
+      )
+    )
+  ) %>% 
+  hc_title(text = "Split Group Composition")
+
+```
+
+### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY DATE {data-width=400}
 
 ```{r}
-data %>%
+library(dplyr)
+library(highcharter)
+
+dataps %>%
   mutate(
     SubmissionDate = as.Date(SubmissionDate, format = "%d%b%Y")
   ) %>%
@@ -201,18 +308,22 @@ data %>%
   arrange(SubmissionDate) %>%
   hchart(
     "line",
-    hcaes(SubmissionDate, n)
+    hcaes(
+      x = datetime_to_timestamp(SubmissionDate),
+      y = n
+    )
   ) %>%
   hc_title(text = "Interviews Over Interview Submission Date") %>%
-  hc_xAxis(type = "datetime") %>%
+  hc_xAxis(type = "datetime", title = list(text = "Submission Date")) %>%
+  hc_yAxis(title = list(text = "Number of Interviews")) %>%
   hc_colors("#2E7D32")
 
 ```
 
-### NO. OF INTERVIEWS  BY GENDER {data-width=300}
+### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY GENDER {data-width=300}
 
 ```{r }
-data %>% 
+dataps %>% 
   filter(!is.na(gender)) %>%
   count(gender) %>%
   mutate(
@@ -243,11 +354,93 @@ data %>%
   )
 ```
 
+PILOT SURVEY
+=====================================
+Row
+-----------------------------------------------------------------------
 
-### RESPONDENTS BY AGE {data-width=400}
+### NO. OF SYNCED PILOT INTERVIEWS BY ENUMERATORS {data-width="600"}
 
 ```{r }
-data %>% 
+Abidulahi <- datapis %>% filter(enum_name == "Abidulahi") %>% nrow()
+Addis <- datapis %>% filter(enum_name == "Addis") %>% nrow()
+Aklilu <- datapis %>% filter(enum_name == "Aklilu") %>% nrow()
+Atakilit <- datapis %>% filter(enum_name == "Atakilit") %>% nrow()
+Bruktawit <- datapis %>% filter(enum_name == "Bruktawit") %>% nrow()
+Daniel <- datapis %>% filter(enum_name == "Daniel") %>% nrow()
+Eyerus <- datapis %>% filter(enum_name == "Eyerus") %>% nrow()
+Hilariy <- datapis %>% filter(enum_name == "Hilariy") %>% nrow()
+Kabtamu <- datapis %>% filter(enum_name == "Kabtamu") %>% nrow()
+Kalkidan <- datapis %>% filter(enum_name == "Kalkidan") %>% nrow()
+Mariyam <- datapis %>% filter(enum_name == "Mariyam") %>% nrow()
+Ruth <- datapis %>% filter(enum_name == "Ruth") %>% nrow()
+Shewakena <- datapis %>% filter(enum_name == "Shewakena") %>% nrow()
+Sitota <- datapis %>% filter(enum_name == "Sitota") %>% nrow()
+Tadele <- datapis %>% filter(enum_name == "Tadele") %>% nrow()
+Tena <- datapis %>% filter(enum_name == "Tena") %>% nrow()
+Tirsit <- datapis %>% filter(enum_name == "Tirsit") %>% nrow()
+Tirunesh <- datapis %>% filter(enum_name == "Tirunesh") %>% nrow()
+Urgessa <- datapis %>% filter(enum_name == "Urgessa") %>% nrow()
+Fikadu <- datapis %>% filter(enum_name == "Fikadu") %>% nrow()
+Yakob <- datapis %>% filter(enum_name == "Yakob") %>% nrow()
+
+datapis %>% 
+  dplyr::filter(!is.na(enum_name)) %>% 
+  dplyr::count(enum_name) %>% 
+  dplyr::arrange(desc(n)) %>% 
+  hchart(
+    "column",
+    hcaes(x = enum_name, y = n)
+  ) %>%
+  hc_title(text = "Number of Interviews Completed by Enumerator") %>%
+  hc_xAxis(title = list(text = "Enumerator")) %>%
+  hc_yAxis(title = list(text = "Total Interviews")) %>%
+  hc_tooltip(pointFormat = "<b>{point.y}</b> interviews") %>%
+  hc_plotOptions(
+    column = list(
+      dataLabels = list(enabled = TRUE)
+    )
+  ) %>%
+  hc_colors(c(
+    "#2ECC71", "#3498DB", "#F1C40F", "#E67E22",
+    "#9B59B6", "#1ABC9C", "#E91E63", "#34495E"
+  ))
+
+```
+
+### NO. OF PILOT INTERVIEWS  BY REGION {data-width=300}
+
+```{r }
+datapis %>% 
+  dplyr::count(region) %>%
+  arrange(-n) %>% 
+  hchart('bar', hcaes(x = 'region', y = 'n'), color_stops(n=4, colors = c("#F65A83", "#FF1E00", "#21E1E1", "#224B0C")))
+```
+ 
+### NO. OF PILOT INTERVIEWS DONE BY DATE {data-width=400}
+
+```{r}
+datapis %>%
+  mutate(
+    SubmissionDate = as.Date(SubmissionDate, format = "%d%b%Y")
+  ) %>%
+  count(SubmissionDate) %>%
+  arrange(SubmissionDate) %>%
+  hchart(
+    "line",
+    hcaes(SubmissionDate, n)
+  ) %>%
+  hc_title(text = "Interviews Over Interview Submission Date") %>%
+  hc_xAxis(type = "datetime") %>%
+  hc_colors("#2E7D32")
+
+```
+## Column
+
+### PILOT SURVEY RESPONDENTS BY AGE {data-width=400}
+
+```{r }
+datapis %>% 
   dplyr::filter(!is.na(age)) %>%
   dplyr::count(age) %>%
   arrange(age) %>% 
@@ -262,18 +455,87 @@ data %>%
 
 ```
 
-MORE GRAPH
+### NO. OF SYNCED PILOT SURVEY INTERVIEWS BY GENDER {data-width=300}
+
+```{r }
+datapis %>% 
+  filter(!is.na(gender)) %>%
+  count(gender) %>%
+  mutate(
+    percent = n / sum(n) * 100
+  ) %>%
+  hchart(
+    "pie",
+    hcaes(x = gender, y = n)
+  ) %>%
+  hc_plotOptions(
+    pie = list(
+      innerSize = "55%",
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.name}: {point.y} ({point.percentage:.1f}%)",
+        style = list(fontWeight = "bold", fontSize = "12px")
+      )
+    )
+  ) %>%
+  hc_tooltip(
+    pointFormat = "<b>{point.y}</b> interviews<br>{point.percentage:.1f}%"
+  ) %>%
+  hc_colors(
+    c(
+      "Male"   = "#2E7D32", 
+      "Female" = "#EC407A"
+    )
+  )
+```
+
+MORE GRAPH ON PHONE SURVEY
 =====================================
 Row
 -----------------------------------------------------------------------
 
-### NO. OF INTERVIEWS BY AGE GROUP  {data-width=400}
+### PHONE SURVEY RESPONDENT'S HOTLINE AWARENESS {data-width=400}
+
+```{r }
+dataps %>% 
+  dplyr::filter(!is.na(q2_4_a)) %>% 
+  dplyr::count(q2_4_a) %>%
+  dplyr::mutate(
+    percent = round(n / sum(n) * 100, 1),
+    label = paste0(n, " (", percent, "%)")
+  ) %>%
+  hchart(
+    "pie",
+    hcaes(
+      x = q2_4_a,
+      y = n
+    )
+  ) %>%
+  hc_title(text = "Have you ever heard of the 8028 Farmer Hotline?") %>%
+  hc_tooltip(
+    pointFormat = "<b>{point.y}</b> respondents<br>{point.percentage:.1f}%"
+  ) %>%
+  hc_plotOptions(
+    pie = list(
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.name}: {point.y} ({point.percentage:.1f}%)"
+      )
+    )
+  ) %>%
+  hc_colors(c("#2ECC71", "#E74C3C"))
+
+
+```
+
+
+### NO. OF SYNCED PHONE INTERVIEWS BY AGE GROUP  {data-width=400}
 
 ```{r }
 library(dplyr)
 library(highcharter)
 
-data %>%
+dataps %>%
   filter(!is.na(age)) %>%
   mutate(
     age = as.numeric(age),
@@ -302,10 +564,10 @@ data %>%
 
 ```
 
-### REPORT BY MAIN MOBILE USER {data-width=400}
+### PHONE SURVEY REPORT BY MAIN MOBILE USER {data-width=400}
 
 ```{r }
-data %>% 
+dataps %>% 
   dplyr::filter(!is.na(q1_2_a)) %>% 
   dplyr::count(q1_2_a) %>%
   dplyr::mutate(
@@ -338,10 +600,10 @@ data %>%
 Column 
 -----------------------------------------------------------------------
 
-###  EDUCATIONAL STATUSE OF RESPONDENTS {data-width=400}
+###  PHONE SURVEY RESPONDENT'S EDUCATIONAL STATUSE OF RESPONDENTS {data-width=400}
 
 ```{r }
-data %>% 
+dataps %>% 
   filter(!is.na(q2_1_i)) %>%
   count(q2_1_i) %>%
   arrange(desc(n)) %>% 
@@ -365,14 +627,14 @@ data %>%
 
 ```
 
-### RESPONDENT'S CHILD OWNERSHIP STATUS  {data-width=400}
+### PHONE SURVEY RESPONDENT'S CHILD OWNERSHIP STATUS  {data-width=400}
 
 ```{r }
 library(dplyr)
 library(highcharter)
 
-data %>% 
-  filter(!is.na(q2_1_g)) %>%        # remove missing FIRST
+dataps %>% 
+  filter(!is.na(q2_1_g)) %>%
   count(q2_1_g) %>%
   arrange(desc(n)) %>% 
   hchart(
@@ -404,3 +666,80 @@ data %>%
 
 ```
 
+
+### PHONE SURVEY RESPONDENTS BY AGE {data-width=400}
+
+```{r }
+dataps %>% 
+  dplyr::filter(!is.na(age)) %>%
+  dplyr::count(age) %>%
+  arrange(age) %>% 
+  hchart(
+    "line",
+    hcaes(x = age, y = n)
+  ) %>%
+  hc_title(text = "Respondents by Age") %>%
+  hc_xAxis(title = list(text = "Age")) %>%
+  hc_yAxis(title = list(text = "Number of Respondents")) %>%
+  hc_colors("#2E7D32")
+
+```
+
+
+### PHONE SURVEY INTERVIEW LANGUAGE {data-width=400}
+```{r}
+library(dplyr)
+library(highcharter)
+
+dataps %>% 
+  dplyr::filter(!is.na(language)) %>% 
+  dplyr::count(language) %>%
+  dplyr::mutate(
+    percent = round(n / sum(n) * 100, 1),
+    label = paste0(n, " (", percent, "%)")
+  ) %>%
+  hchart(
+    type = "pie",
+    hcaes(
+      x = language,
+      y = n
+    )
+  ) %>%
+  hc_title(
+    text = "Language Interview Conducted With",
+    align = "center",
+    style = list(fontSize = "18px", fontWeight = "bold")
+  ) %>%
+  hc_subtitle(
+    text = "Phone Survey Respondents",
+    align = "center"
+  ) %>%
+  hc_plotOptions(
+    pie = list(
+      innerSize = "60%",          # Donut style
+      borderWidth = 1,
+      borderColor = "#FFFFFF",
+      dataLabels = list(
+        enabled = TRUE,
+        distance = 15,
+        format = "<b>{point.name}</b><br>{point.y} ({point.percentage:.1f}%)",
+        style = list(fontSize = "12px")
+      )
+    )
+  ) %>%
+  hc_tooltip(
+    backgroundColor = "#FFFFFF",
+    borderColor = "#CCCCCC",
+    pointFormat = "<b>{point.name}</b><br>
+                   Respondents: <b>{point.y}</b><br>
+                   Percentage: <b>{point.percentage:.1f}%</b>"
+  ) %>%
+  hc_legend(
+    align = "right",
+    verticalAlign = "middle",
+    layout = "vertical"
+  ) %>%
+  hc_colors(
+    c("#1F77B4", "#FF7F0E", "#2CA02C", "#9467BD", "#8C564B")
+  )
+```
