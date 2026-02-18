@@ -245,18 +245,7 @@ dataps %>%
   )
 
 ```
-### TOTAL NO. OF SYNCED PHONE SURVEY INTERVIEWS BY REGION {data-width=700}
-
-```{r }
-dataps %>% 
-  dplyr::count(region) %>%
-  arrange(-n) %>% 
-  hchart('bar', hcaes(x = 'region', y = 'n'), color_stops(n=4, colors = c("#F65A83", "#FF1E00", "#21E1E1", "#224B0C")))
-```
-
-## Column
-
-### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY SPLIT GROUP {data-width=300}
+### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY SPLIT GROUP {data-width=600}
 
 ```{r }
 library(dplyr)
@@ -293,8 +282,18 @@ dataps %>%
   hc_title(text = "Split Group Composition")
 
 ```
+### TOTAL NO. OF SYNCED PHONE SURVEY INTERVIEWS BY REGION {data-width=600}
 
-### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY DATE {data-width=400}
+```{r }
+dataps %>% 
+  dplyr::count(region) %>%
+  arrange(-n) %>% 
+  hchart('bar', hcaes(x = 'region', y = 'n'), color_stops(n=4, colors = c("#F65A83", "#FF1E00", "#21E1E1", "#224B0C")))
+```
+
+## Column
+
+### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY DATE {data-width=300}
 
 ```{r}
 library(dplyr)
@@ -353,6 +352,162 @@ dataps %>%
     )
   )
 ```
+
+### NO. OF SYNCED PHONE SURVEY  {data-width=500}
+
+```{r}
+
+dataps %>% 
+  dplyr::select(study1, study2, study3) %>%
+  
+  tidyr::pivot_longer(
+    cols = everything(),
+    names_to = "study",
+    values_to = "value"
+  ) %>%
+  
+  dplyr::filter(value %in% c(0, 1)) %>%
+  
+  dplyr::count(study, value) %>%
+  
+  dplyr::group_by(study) %>%
+  dplyr::mutate(
+    percent = round(n / sum(n) * 100, 1),
+    label = paste0(n, " (", percent, "%)")
+  ) %>%
+  dplyr::ungroup() %>%
+  
+  # plot
+  hchart(
+    type = "column",
+    hcaes(
+      x = study,
+      y = n,
+      group = factor(value)
+    )
+  ) %>%
+  
+  hc_title(
+    text = "Distribution of Study Variables",
+    align = "center",
+    style = list(fontSize = "18px", fontWeight = "bold")
+  ) %>%
+  
+  hc_plotOptions(
+    column = list(
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.y} ({point.percentage:.1f}%)",
+        style = list(fontSize = "11px")
+      )
+    )
+  ) %>%
+  
+  hc_tooltip(
+    pointFormat = "<b>{series.name}</b><br>
+                   Count: <b>{point.y}</b><br>
+                   Percentage: <b>{point.percentage:.1f}%</b>"
+  ) %>%
+  
+  hc_legend(
+    title = list(text = "Value (0 = No, 1 = Yes)"),
+    align = "right",
+    verticalAlign = "middle"
+  ) %>%
+  
+  hc_colors(c("#D62728", "#2CA02C"))
+```
+
+### NO. OF SYNCED PHONE SURVEY  {data-width=500}
+
+```{r }
+library(dplyr)
+library(tidyr)
+library(highcharter)
+
+dataps %>% 
+  select(gender, study1, study2, study3) %>%
+  filter(!is.na(gender)) %>%
+  
+  pivot_longer(
+    cols = c(study1, study2, study3),
+    names_to = "study",
+    values_to = "value"
+  ) %>%
+  
+  filter(value %in% c(0, 1)) %>%
+  
+  count(study, gender, value) %>%
+  
+  group_by(study, gender) %>%
+  mutate(percent = round(n / sum(n) * 100, 1)) %>%
+  ungroup() %>%
+  
+  hchart(
+    type = "column",
+    hcaes(
+      x = study,
+      y = n,
+      group = interaction(gender, value)
+    )
+  ) %>%
+  
+  hc_chart(
+    height = 500,
+    backgroundColor = "#FAFAFA"
+  ) %>%
+  
+  hc_colors(c("#4E79A7", "#A0CBE8", "#F28E2B", "#FFBE7D")) %>%
+  
+  hc_title(
+    text = "Distribution of Study Variables by Gender",
+    align = "center",
+    style = list(fontSize = "18px", fontWeight = "bold")
+  ) %>%
+  
+  hc_subtitle(
+    text = "Stacked bars: 0 = No, 1 = Yes",
+    align = "center"
+  ) %>%
+  
+  hc_plotOptions(
+    column = list(
+      stacking = "normal",
+      borderWidth = 0,
+      pointPadding = 0.08,
+      groupPadding = 0.2,
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.y}",
+        style = list(
+          fontSize = "11px",
+          fontWeight = "bold",
+          textOutline = "none"
+        )
+      )
+    )
+  ) %>%
+  
+  hc_tooltip(
+    useHTML = TRUE,
+    backgroundColor = "#FFFFFF",
+    borderColor = "#CCCCCC",
+    pointFormat = "
+      <b>{series.name}</b><br>
+      Count: <b>{point.y}</b>
+    "
+  ) %>%
+  
+  hc_legend(
+    layout = "vertical",
+    align = "right",
+    verticalAlign = "middle",
+    symbolRadius = 0,
+    itemStyle = list(fontSize = "12px")
+  )
+
+```
+
 
 PILOT SURVEY
 =====================================
