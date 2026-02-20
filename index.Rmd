@@ -2,7 +2,7 @@
 title: "WB Farmer Hotline Screening Phone Survey"
 author: "Frontieri consultancy"
 
-date: "[Feb 18, 2026 | 08:00 AM]"
+date: "[Feb 21, 2026 | 08:00 AM]"
 
 output: 
   flexdashboard::flex_dashboard:
@@ -152,21 +152,21 @@ Row
 -----------------------------------------------------------------------
 
 
-### TOTAL SYNCED ATI PHONE SURVEY INTERVIEWS
+### TOTAL SYNCED ATA PHONE SURVEY INTERVIEWS
 
 ```{r}
 total_interview<-nrow(dataps)
 valueBox(total_interview, icon = "fa-bar-chart")
 ```
 
-### TOTAL SYNCED ATI PILOT INTERVIEWS
+### TOTAL SYNCED ATA PILOT INTERVIEWS
 
 ```{r}
 total_interview<-nrow(datapis)
 valueBox(total_interview, icon = "fa-bar-chart")
 ```
 
-### TOTAL SYNCED ATI BACKCHECK INTERVIEWS
+### TOTAL SYNCED ATA BACKCHECK INTERVIEWS
 
 ```{r}
 total_interview<-nrow(databc)
@@ -175,31 +175,47 @@ valueBox(total_interview, icon = "fa-bar-chart")
 
 ## Column
 
-### NO. OF SYNCED PHONE INTERVIEWS BY SUPERVISORS {data-width="400"}
+### NO. OF SYNCED PHONE INTERVIEWS BY SUPERVISORS {data-width="600"}
 
 ```{r }
-Shambel <- dataps %>% filter(supervisor_name == "Shambel") %>% nrow()
-Addis <- dataps %>% filter(supervisor_name == "Addis") %>% nrow()
-Fikiru <- dataps %>% filter(supervisor_name == "Fikiru") %>% nrow()
-Gachano <- dataps %>% filter(supervisor_name == "Gachano") %>% nrow()
-Gashayeneh <- dataps %>% filter(supervisor_name == "Gashayeneh") %>% nrow()
-Misrak <- dataps %>% filter(supervisor_name == "Misrak") %>% nrow()
+library(dplyr)
+library(highcharter)
 
 dataps %>% 
-  dplyr::filter(!is.na(supervisor_name)) %>% 
-  dplyr::count(supervisor_name) %>% 
-  dplyr::arrange(desc(n)) %>% 
+  filter(!is.na(supervisor_name)) %>% 
+  count(supervisor_name) %>% 
+  arrange(desc(n)) %>% 
+  mutate(
+    name = supervisor_name,
+    y = n
+  ) %>% 
   hchart(
-    "column",
-    hcaes(x = supervisor_name, y = n)
+    type = "column",
+    hcaes(x = name, y = y),
+    colorByPoint = TRUE
   ) %>%
-  hc_title(text = "Number of Interviews synced by teams") %>%
-  hc_xAxis(title = list(text = "Supervisors")) %>%
-  hc_yAxis(title = list(text = "Total Interviews Synced")) %>%
-  hc_tooltip(pointFormat = "<b>{point.y}</b> interviews") %>%
+  hc_title(text = "Number of Interviews Synced by Teams") %>%
+  hc_xAxis(
+    title = list(text = "Supervisors"),
+    labels = list(rotation = -20)
+  ) %>%
+  hc_yAxis(
+    title = list(text = "Total Interviews Synced")
+  ) %>%
+  hc_tooltip(
+    pointFormat = "<b>{point.y}</b> interviews"
+  ) %>%
   hc_plotOptions(
     column = list(
-      dataLabels = list(enabled = TRUE)
+      dataLabels = list(
+        enabled = TRUE,
+        format = "{point.y}"
+      ),
+      states = list(
+        hover = list(
+          brightness = 0.25 
+        )
+      )
     )
   ) %>%
   hc_colors(c(
@@ -207,45 +223,10 @@ dataps %>%
     "#9B59B6", "#1ABC9C", "#E91E63", "#34495E"
   ))
 
-
 ```
 
 
-### SYNCED PHONE INTERVIEWS BY CONSENT STATUS {data-width=400}
-
-```{r }
-
-dataps %>% 
-  filter(!is.na(consent)) %>%
-  count(consent) %>%
-  arrange(desc(n)) %>%
-  hchart(
-    "column",
-    hcaes(x = consent, y = n)
-  ) %>%
-  hc_title(text = "Consent Status of Respondents") %>%
-  hc_xAxis(title = list(text = "Consent")) %>%
-  hc_yAxis(title = list(text = "Number of Respondents")) %>%
-  hc_plotOptions(
-    column = list(
-      borderRadius = 6,
-      dataLabels = list(
-        enabled = TRUE,
-        format = "{point.y}",
-        style = list(fontWeight = "bold")
-      )
-    )
-  ) %>%
-  hc_tooltip(pointFormat = "<b>{point.y}</b> respondents") %>%
-  hc_colors(
-    c(
-      "Yes" = "#2E7D32",
-      "No"  = "#D32F2F" 
-    )
-  )
-
-```
-### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY SPLIT GROUP {data-width=600}
+### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY SPLIT GROUP {data-width=400}
 
 ```{r }
 library(dplyr)
@@ -292,32 +273,6 @@ dataps %>%
 ```
 
 ## Column
-
-### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY DATE {data-width=300}
-
-```{r}
-library(dplyr)
-library(highcharter)
-
-dataps %>%
-  mutate(
-    SubmissionDate = as.Date(SubmissionDate, format = "%d%b%Y")
-  ) %>%
-  count(SubmissionDate) %>%
-  arrange(SubmissionDate) %>%
-  hchart(
-    "line",
-    hcaes(
-      x = datetime_to_timestamp(SubmissionDate),
-      y = n
-    )
-  ) %>%
-  hc_title(text = "Interviews Over Interview Submission Date") %>%
-  hc_xAxis(type = "datetime", title = list(text = "Submission Date")) %>%
-  hc_yAxis(title = list(text = "Number of Interviews")) %>%
-  hc_colors("#2E7D32")
-
-```
 
 ### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY GENDER {data-width=300}
 
@@ -508,148 +463,12 @@ dataps %>%
 
 ```
 
-
-PILOT SURVEY
-=====================================
-Row
------------------------------------------------------------------------
-
-### NO. OF SYNCED PILOT INTERVIEWS BY ENUMERATORS {data-width="600"}
-
-```{r }
-Abidulahi <- datapis %>% filter(enum_name == "Abidulahi") %>% nrow()
-Addis <- datapis %>% filter(enum_name == "Addis") %>% nrow()
-Aklilu <- datapis %>% filter(enum_name == "Aklilu") %>% nrow()
-Atakilit <- datapis %>% filter(enum_name == "Atakilit") %>% nrow()
-Bruktawit <- datapis %>% filter(enum_name == "Bruktawit") %>% nrow()
-Daniel <- datapis %>% filter(enum_name == "Daniel") %>% nrow()
-Eyerus <- datapis %>% filter(enum_name == "Eyerus") %>% nrow()
-Hilariy <- datapis %>% filter(enum_name == "Hilariy") %>% nrow()
-Kabtamu <- datapis %>% filter(enum_name == "Kabtamu") %>% nrow()
-Kalkidan <- datapis %>% filter(enum_name == "Kalkidan") %>% nrow()
-Mariyam <- datapis %>% filter(enum_name == "Mariyam") %>% nrow()
-Ruth <- datapis %>% filter(enum_name == "Ruth") %>% nrow()
-Shewakena <- datapis %>% filter(enum_name == "Shewakena") %>% nrow()
-Sitota <- datapis %>% filter(enum_name == "Sitota") %>% nrow()
-Tadele <- datapis %>% filter(enum_name == "Tadele") %>% nrow()
-Tena <- datapis %>% filter(enum_name == "Tena") %>% nrow()
-Tirsit <- datapis %>% filter(enum_name == "Tirsit") %>% nrow()
-Tirunesh <- datapis %>% filter(enum_name == "Tirunesh") %>% nrow()
-Urgessa <- datapis %>% filter(enum_name == "Urgessa") %>% nrow()
-Fikadu <- datapis %>% filter(enum_name == "Fikadu") %>% nrow()
-Yakob <- datapis %>% filter(enum_name == "Yakob") %>% nrow()
-
-datapis %>% 
-  dplyr::filter(!is.na(enum_name)) %>% 
-  dplyr::count(enum_name) %>% 
-  dplyr::arrange(desc(n)) %>% 
-  hchart(
-    "column",
-    hcaes(x = enum_name, y = n)
-  ) %>%
-  hc_title(text = "Number of Interviews Completed by Enumerator") %>%
-  hc_xAxis(title = list(text = "Enumerator")) %>%
-  hc_yAxis(title = list(text = "Total Interviews")) %>%
-  hc_tooltip(pointFormat = "<b>{point.y}</b> interviews") %>%
-  hc_plotOptions(
-    column = list(
-      dataLabels = list(enabled = TRUE)
-    )
-  ) %>%
-  hc_colors(c(
-    "#2ECC71", "#3498DB", "#F1C40F", "#E67E22",
-    "#9B59B6", "#1ABC9C", "#E91E63", "#34495E"
-  ))
-
-```
-
-### NO. OF PILOT INTERVIEWS  BY REGION {data-width=300}
-
-```{r }
-datapis %>% 
-  dplyr::count(region) %>%
-  arrange(-n) %>% 
-  hchart('bar', hcaes(x = 'region', y = 'n'), color_stops(n=4, colors = c("#F65A83", "#FF1E00", "#21E1E1", "#224B0C")))
-```
- 
-### NO. OF PILOT INTERVIEWS DONE BY DATE {data-width=400}
-
-```{r}
-datapis %>%
-  mutate(
-    SubmissionDate = as.Date(SubmissionDate, format = "%d%b%Y")
-  ) %>%
-  count(SubmissionDate) %>%
-  arrange(SubmissionDate) %>%
-  hchart(
-    "line",
-    hcaes(SubmissionDate, n)
-  ) %>%
-  hc_title(text = "Interviews Over Interview Submission Date") %>%
-  hc_xAxis(type = "datetime") %>%
-  hc_colors("#2E7D32")
-
-```
-## Column
-
-### PILOT SURVEY RESPONDENTS BY AGE {data-width=400}
-
-```{r }
-datapis %>% 
-  dplyr::filter(!is.na(age)) %>%
-  dplyr::count(age) %>%
-  arrange(age) %>% 
-  hchart(
-    "line",
-    hcaes(x = age, y = n)
-  ) %>%
-  hc_title(text = "Respondents by Age") %>%
-  hc_xAxis(title = list(text = "Age")) %>%
-  hc_yAxis(title = list(text = "Number of Respondents")) %>%
-  hc_colors("#2E7D32")
-
-```
-
-### NO. OF SYNCED PILOT SURVEY INTERVIEWS BY GENDER {data-width=300}
-
-```{r }
-datapis %>% 
-  filter(!is.na(gender)) %>%
-  count(gender) %>%
-  mutate(
-    percent = n / sum(n) * 100
-  ) %>%
-  hchart(
-    "pie",
-    hcaes(x = gender, y = n)
-  ) %>%
-  hc_plotOptions(
-    pie = list(
-      innerSize = "55%",
-      dataLabels = list(
-        enabled = TRUE,
-        format = "{point.name}: {point.y} ({point.percentage:.1f}%)",
-        style = list(fontWeight = "bold", fontSize = "12px")
-      )
-    )
-  ) %>%
-  hc_tooltip(
-    pointFormat = "<b>{point.y}</b> interviews<br>{point.percentage:.1f}%"
-  ) %>%
-  hc_colors(
-    c(
-      "Male"   = "#2E7D32", 
-      "Female" = "#EC407A"
-    )
-  )
-```
-
 MORE GRAPH ON PHONE SURVEY
 =====================================
 Row
 -----------------------------------------------------------------------
 
-### PHONE SURVEY RESPONDENT'S HOTLINE AWARENESS {data-width=400}
+### ATA PHONE SURVEY RESPONDENT'S HOTLINE AWARENESS {data-width=400}
 
 ```{r }
 dataps %>% 
@@ -719,7 +538,7 @@ dataps %>%
 
 ```
 
-### PHONE SURVEY REPORT BY MAIN MOBILE USER {data-width=400}
+### ATA PHONE SURVEY REPORT BY MAIN MOBILE USER {data-width=400}
 
 ```{r }
 dataps %>% 
@@ -755,7 +574,7 @@ dataps %>%
 Column 
 -----------------------------------------------------------------------
 
-###  PHONE SURVEY RESPONDENT'S EDUCATIONAL STATUSE OF RESPONDENTS {data-width=400}
+### ATA PHONE SURVEY RESPONDENT'S EDUCATIONAL STATUSE OF RESPONDENTS {data-width=400}
 
 ```{r }
 dataps %>% 
@@ -782,66 +601,34 @@ dataps %>%
 
 ```
 
-### PHONE SURVEY RESPONDENT'S CHILD OWNERSHIP STATUS  {data-width=400}
+### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY DATE {data-width=300}
 
-```{r }
+```{r}
 library(dplyr)
 library(highcharter)
 
-dataps %>% 
-  filter(!is.na(q2_1_g)) %>%
-  count(q2_1_g) %>%
-  arrange(desc(n)) %>% 
-  hchart(
-    "column",
-    hcaes(x = q2_1_g, y = n)
+dataps %>%
+  mutate(
+    SubmissionDate = as.Date(SubmissionDate, format = "%d%b%Y")
   ) %>%
-  hc_title(text = "Do You Have Any Child?") %>%
-  hc_xAxis(title = list(text = "Response")) %>%
-  hc_yAxis(title = list(text = "Number of Respondents")) %>%
-  hc_plotOptions(
-    column = list(
-      borderRadius = 6,
-      dataLabels = list(
-        enabled = TRUE,
-        format = "{point.y}",
-        style = list(fontWeight = "bold")
-      )
-    )
-  ) %>%
-  hc_tooltip(pointFormat = "<b>{point.y}</b> respondents") %>%
-  hc_colors(
-    c(
-      "#2E7D32",  # Green
-      "#EC407A",  # Pink
-      "#F9A825",  # Yellow
-      "#21E1E1"   # Cyan
-    )
-  )
-
-```
-
-
-### PHONE SURVEY RESPONDENTS BY AGE {data-width=400}
-
-```{r }
-dataps %>% 
-  dplyr::filter(!is.na(age)) %>%
-  dplyr::count(age) %>%
-  arrange(age) %>% 
+  count(SubmissionDate) %>%
+  arrange(SubmissionDate) %>%
   hchart(
     "line",
-    hcaes(x = age, y = n)
+    hcaes(
+      x = datetime_to_timestamp(SubmissionDate),
+      y = n
+    )
   ) %>%
-  hc_title(text = "Respondents by Age") %>%
-  hc_xAxis(title = list(text = "Age")) %>%
-  hc_yAxis(title = list(text = "Number of Respondents")) %>%
+  hc_title(text = "Interviews Over Interview Submission Date") %>%
+  hc_xAxis(type = "datetime", title = list(text = "Submission Date")) %>%
+  hc_yAxis(title = list(text = "Number of Interviews")) %>%
   hc_colors("#2E7D32")
 
 ```
 
 
-### PHONE SURVEY INTERVIEW LANGUAGE {data-width=400}
+### ATA PHONE SURVEY INTERVIEW LANGUAGE {data-width=400}
 ```{r}
 library(dplyr)
 library(highcharter)
