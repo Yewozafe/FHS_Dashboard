@@ -2,14 +2,16 @@
 title: "WB Farmer Hotline Screening Phone Survey"
 author: "Frontieri consultancy"
 
-date: "[Feb 21, 2026 | 08:00 AM]"
+date: "[Feb 26, 2026 | 08:00 AM]"
 
 output: 
   flexdashboard::flex_dashboard:
     orientation: row
     vertical_layout: fill
+    fontsize: 16pt
     
     logo: logo.png
+
     
 ---
 
@@ -32,7 +34,7 @@ library(hrbrthemes)
 ```{r}
 #Phone Survey
 dataps <- read_dta(
-  "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/ATI_Farmer_Hotline_phone_survey_500_Callers_WIDE.dta"
+  "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/Eligible_ATI_Farmer_Hotline_phone_survey_500_Callers.dta"
 )
 
 dataps <- dataps %>% mutate(across(where(is.labelled), as_factor))
@@ -152,17 +154,10 @@ Row
 -----------------------------------------------------------------------
 
 
-### TOTAL SYNCED ATA PHONE SURVEY INTERVIEWS
+### TOTAL SYNCED ELIGABLE ATA FARMER HOTLINE PHONE SURVEY INTERVIEWS
 
 ```{r}
 total_interview<-nrow(dataps)
-valueBox(total_interview, icon = "fa-bar-chart")
-```
-
-### TOTAL SYNCED ATA PILOT INTERVIEWS
-
-```{r}
-total_interview<-nrow(datapis)
 valueBox(total_interview, icon = "fa-bar-chart")
 ```
 
@@ -186,6 +181,7 @@ dataps %>%
   count(supervisor_name) %>% 
   arrange(desc(n)) %>% 
   mutate(
+    supervisor_name = factor(supervisor_name, levels = supervisor_name),
     name = supervisor_name,
     y = n
   ) %>% 
@@ -194,35 +190,56 @@ dataps %>%
     hcaes(x = name, y = y),
     colorByPoint = TRUE
   ) %>%
-  hc_title(text = "Number of Interviews Synced by Teams") %>%
+  hc_title(
+    text = "Number of Interviews Synced by Teams",
+    style = list(
+      fontWeight = "bold",
+      fontSize = "22px"
+    )
+  ) %>%
   hc_xAxis(
-    title = list(text = "Supervisors"),
-    labels = list(rotation = -20)
+    title = list(
+      text = "Supervisors",
+      style = list(fontWeight = "bold", fontSize = "16px")
+    ),
+    labels = list(
+      rotation = -20,
+      style = list(fontWeight = "bold", fontSize = "14px")
+    )
   ) %>%
   hc_yAxis(
-    title = list(text = "Total Interviews Synced")
+    title = list(
+      text = "Total Interviews Synced",
+      style = list(fontWeight = "bold", fontSize = "16px")
+    ),
+    labels = list(
+      style = list(fontWeight = "bold", fontSize = "14px")
+    )
   ) %>%
   hc_tooltip(
+    style = list(fontSize = "14px"),
     pointFormat = "<b>{point.y}</b> interviews"
   ) %>%
   hc_plotOptions(
     column = list(
       dataLabels = list(
         enabled = TRUE,
+        style = list(
+          fontWeight = "bold",
+          fontSize = "14px"
+        ),
         format = "{point.y}"
       ),
       states = list(
-        hover = list(
-          brightness = 0.25 
-        )
+        hover = list(brightness = 0.25)
       )
     )
   ) %>%
+  hc_legend(enabled = FALSE) %>%
   hc_colors(c(
     "#2ECC71", "#3498DB", "#F1C40F", "#E67E22",
     "#9B59B6", "#1ABC9C", "#E91E63", "#34495E"
   ))
-
 ```
 
 
@@ -251,216 +268,169 @@ dataps %>%
     ),
     colors = group_colors
   ) %>% 
+  hc_title(
+    text = "Split Group Composition",
+    style = list(
+      fontWeight = "bold",
+      fontSize = "20px"
+    )
+  ) %>%
   hc_plotOptions(
     pie = list(
       innerSize = "60%",
       dataLabels = list(
         enabled = TRUE,
+        useHTML = TRUE,
+        style = list(
+          fontWeight = "bold",
+          fontSize = "14px"
+        ),
         format = "<b>{point.name}</b><br>{point.y} ({point.percentage:.1f}%)"
       )
     )
-  ) %>% 
-  hc_title(text = "Split Group Composition")
+  ) %>%
+  hc_tooltip(
+    useHTML = TRUE,
+    style = list(
+      fontWeight = "bold",
+      fontSize = "14px"
+    ),
+    pointFormat = "<b>{point.name}</b><br>
+                   <b>{point.y}</b> ({point.percentage:.1f}%)"
+  ) %>%
+  hc_legend(
+    itemStyle = list(
+      fontWeight = "bold",
+      fontSize = "14px"
+    )
+  )
 
 ```
-### TOTAL NO. OF SYNCED PHONE SURVEY INTERVIEWS BY REGION {data-width=600}
+### NO. OF ELIGABLE FARMERS BY GENDER  {data-width=500}
 
-```{r }
+```{r}
+library(dplyr)
+library(highcharter)
+
 dataps %>% 
-  dplyr::count(region) %>%
-  arrange(-n) %>% 
-  hchart('bar', hcaes(x = 'region', y = 'n'), color_stops(n=4, colors = c("#F65A83", "#FF1E00", "#21E1E1", "#224B0C")))
+  mutate(
+    split_group = recode(
+      as.character(split_group),
+      "1" = "Group A",
+      "2" = "Group B",
+      "3" = "Group C"
+    )
+  ) %>% 
+  count(split_group) %>% 
+  hchart(
+    type = "pie",
+    hcaes(
+      x = split_group,
+      y = n,
+      color = split_group
+    ),
+    colors = group_colors
+  ) %>% 
+  hc_title(
+    text = "Split Group Composition",
+    style = list(
+      fontWeight = "bold",
+      fontSize = "20px"
+    )
+  ) %>%
+  hc_plotOptions(
+    pie = list(
+      innerSize = "60%",
+      dataLabels = list(
+        enabled = TRUE,
+        useHTML = TRUE,
+        style = list(
+          fontWeight = "bold",
+          fontSize = "14px"
+        ),
+        format = "<b>{point.name}</b><br>{point.y} ({point.percentage:.1f}%)"
+      )
+    )
+  ) %>%
+  hc_tooltip(
+    useHTML = TRUE,
+    style = list(
+      fontWeight = "bold",
+      fontSize = "14px"
+    ),
+    pointFormat = "<b>{point.name}</b><br>
+                   <b>{point.y}</b> ({point.percentage:.1f}%)"
+  ) %>%
+  hc_legend(
+    itemStyle = list(
+      fontWeight = "bold",
+      fontSize = "14px"
+    )
+  )
 ```
 
 ## Column
 
-### NO. OF SYNCED PHONE SURVEY INTERVIEWS BY GENDER {data-width=300}
-
-```{r }
-dataps %>% 
-  filter(!is.na(gender)) %>%
-  count(gender) %>%
-  mutate(
-    percent = n / sum(n) * 100
-  ) %>%
-  hchart(
-    "pie",
-    hcaes(x = gender, y = n)
-  ) %>%
-  hc_plotOptions(
-    pie = list(
-      innerSize = "55%",
-      dataLabels = list(
-        enabled = TRUE,
-        format = "{point.name}: {point.y} ({point.percentage:.1f}%)",
-        style = list(fontWeight = "bold", fontSize = "12px")
-      )
-    )
-  ) %>%
-  hc_tooltip(
-    pointFormat = "<b>{point.y}</b> interviews<br>{point.percentage:.1f}%"
-  ) %>%
-  hc_colors(
-    c(
-      "Male"   = "#2E7D32", 
-      "Female" = "#EC407A"
-    )
-  )
-```
-
-### NO. OF SYNCED PHONE SURVEY  {data-width=500}
-
-```{r}
-
-dataps %>% 
-  dplyr::select(study1, study2, study3) %>%
-  
-  tidyr::pivot_longer(
-    cols = everything(),
-    names_to = "study",
-    values_to = "value"
-  ) %>%
-  
-  dplyr::filter(value %in% c(0, 1)) %>%
-  
-  dplyr::count(study, value) %>%
-  
-  dplyr::group_by(study) %>%
-  dplyr::mutate(
-    percent = round(n / sum(n) * 100, 1),
-    label = paste0(n, " (", percent, "%)")
-  ) %>%
-  dplyr::ungroup() %>%
-  
-  # plot
-  hchart(
-    type = "column",
-    hcaes(
-      x = study,
-      y = n,
-      group = factor(value)
-    )
-  ) %>%
-  
-  hc_title(
-    text = "Distribution of Study Variables",
-    align = "center",
-    style = list(fontSize = "18px", fontWeight = "bold")
-  ) %>%
-  
-  hc_plotOptions(
-    column = list(
-      dataLabels = list(
-        enabled = TRUE,
-        format = "{point.y} ({point.percentage:.1f}%)",
-        style = list(fontSize = "11px")
-      )
-    )
-  ) %>%
-  
-  hc_tooltip(
-    pointFormat = "<b>{series.name}</b><br>
-                   Count: <b>{point.y}</b><br>
-                   Percentage: <b>{point.percentage:.1f}%</b>"
-  ) %>%
-  
-  hc_legend(
-    title = list(text = "Value (0 = No, 1 = Yes)"),
-    align = "right",
-    verticalAlign = "middle"
-  ) %>%
-  
-  hc_colors(c("#D62728", "#2CA02C"))
-```
-
-### NO. OF SYNCED PHONE SURVEY  {data-width=500}
+### TOTAL NO. OF SYNCED PHONE SURVEY INTERVIEWS BY REGION {data-width=600}
 
 ```{r }
 library(dplyr)
-library(tidyr)
 library(highcharter)
 
 dataps %>% 
-  select(gender, study1, study2, study3) %>%
-  filter(!is.na(gender)) %>%
-  
-  pivot_longer(
-    cols = c(study1, study2, study3),
-    names_to = "study",
-    values_to = "value"
+  count(region) %>%
+  arrange(desc(n)) %>% 
+  mutate(
+    region = factor(region, levels = region),
+    name = region,
+    y = n
   ) %>%
-  
-  filter(value %in% c(0, 1)) %>%
-  
-  count(study, gender, value) %>%
-  
-  group_by(study, gender) %>%
-  mutate(percent = round(n / sum(n) * 100, 1)) %>%
-  ungroup() %>%
-  
   hchart(
-    type = "column",
-    hcaes(
-      x = study,
-      y = n,
-      group = interaction(gender, value)
+    type = "bar",
+    hcaes(x = name, y = y),
+    colorByPoint = TRUE
+  ) %>%
+  hc_title(
+    text = "Number of Records by Region",
+    style = list(fontWeight = "bold", fontSize = "18px")
+  ) %>%
+  hc_xAxis(
+    title = list(
+      text = "Region",
+      style = list(fontWeight = "bold")
+    ),
+    labels = list(
+      style = list(fontWeight = "bold", fontSize = "12px")
     )
   ) %>%
-  
-  hc_chart(
-    height = 500,
-    backgroundColor = "#FAFAFA"
+  hc_yAxis(
+    title = list(
+      text = "Total Count",
+      style = list(fontWeight = "bold")
+    ),
+    labels = list(
+      style = list(fontWeight = "bold")
+    )
   ) %>%
-  
-  hc_colors(c("#4E79A7", "#A0CBE8", "#F28E2B", "#FFBE7D")) %>%
-  
-  hc_title(
-    text = "Distribution of Study Variables by Gender",
-    align = "center",
-    style = list(fontSize = "18px", fontWeight = "bold")
-  ) %>%
-  
-  hc_subtitle(
-    text = "Stacked bars: 0 = No, 1 = Yes",
-    align = "center"
-  ) %>%
-  
   hc_plotOptions(
-    column = list(
-      stacking = "normal",
-      borderWidth = 0,
-      pointPadding = 0.08,
-      groupPadding = 0.2,
+    bar = list(
+      pointWidth = 22,  
       dataLabels = list(
         enabled = TRUE,
-        format = "{point.y}",
         style = list(
-          fontSize = "11px",
           fontWeight = "bold",
-          textOutline = "none"
+          fontSize = "12px"
         )
       )
     )
   ) %>%
-  
   hc_tooltip(
-    useHTML = TRUE,
-    backgroundColor = "#FFFFFF",
-    borderColor = "#CCCCCC",
-    pointFormat = "
-      <b>{series.name}</b><br>
-      Count: <b>{point.y}</b>
-    "
+    pointFormat = "<b>{point.y}</b> records"
   ) %>%
-  
-  hc_legend(
-    layout = "vertical",
-    align = "right",
-    verticalAlign = "middle",
-    symbolRadius = 0,
-    itemStyle = list(fontSize = "12px")
-  )
-
+  hc_colors(c(
+    "#1ABC9C", "#3498DB", "#9B59B6", "#F39C12",
+    "#E74C3C", "#2ECC71", "#34495E", "#E91E63"
+  ))
 ```
 
 MORE GRAPH ON PHONE SURVEY
