@@ -2,7 +2,7 @@
 title: "WB Farmer Hotline Screening Phone Survey"
 author: "Frontieri consultancy"
 
-date: "[Feb 26, 2026 | 08:00 AM]"
+date: "[Feb 27, 2026 | 10:00 AM]"
 
 output: 
   flexdashboard::flex_dashboard:
@@ -11,8 +11,6 @@ output:
     fontsize: 16pt
     
     logo: logo.png
-
-    
 ---
 
 
@@ -32,14 +30,14 @@ library(viridis)
 library(hrbrthemes)
 ```
 ```{r}
-#Phone Survey
+#Phone Survey - Eligible
 dataps <- read_dta(
   "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/Eligible_ATI_Farmer_Hotline_phone_survey_500_Callers.dta"
 )
 
-dataps <- dataps %>% mutate(across(where(is.labelled), as_factor))
+dataps <- datapse %>% mutate(across(where(is.labelled), as_factor))
 
-dataps <- dataps %>%
+dataps <- datapse %>%
   rename(
     region        = region_preload,
     supervisor_name = supervisor,
@@ -48,10 +46,10 @@ dataps <- dataps %>%
   select(-consent) %>%
   rename(consent = consent1)
 
-dataps <- dataps %>%
+dataps <- datapse %>%
   mutate(
-    supervisor_name = str_replace_all(
-      supervisor_name,
+    supervisor = str_replace_all(
+      supervisor,
       c(
         "Shambel Awgachew" = "Shambel",
         "Jemila Umar" = "Jemila",
@@ -65,6 +63,17 @@ dataps <- dataps %>%
 
 ```
 
+
+```{r}
+#Phone Survey Total
+datapse <- read_dta(
+  "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/ATI_Farmer_Hotline_phone_survey_500_Callers.dta"
+)
+
+dataps <- dataps %>% mutate(across(where(is.labelled), as_factor))
+
+```
+
 ```{r}
 #Backcheck Survey
 databc <- read_dta(
@@ -75,7 +84,7 @@ databc <- databc %>% mutate(across(where(is.labelled), as_factor))
 
 databc <- databc %>%
   rename(
-    region        = region_preload,
+    region = region_preload,
     supervisor_name = supervisor,
     marital_statu = q1_2_d
   ) %>%
@@ -98,61 +107,17 @@ databc <- databc %>%
   )
   
 ```
-
-```{r}
-#Pilot Survey
-datapis <- read_dta(
-  "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/Pilot_Farmer_Hotline_Screening_Phone_Survey_WIDE.dta"
-)
-
-datapis <- datapis %>% mutate(across(where(is.labelled), as_factor))
-
-datapis <- datapis %>%
-  rename(
-    region        = region_preload,
-    enum_name     = enumerator_name,
-    marital_statu = q1_2_d
-  ) %>%
-  select(-consent) %>%
-  rename(consent = consent1)
-
-datapis <- datapis %>%
-  mutate(
-    enum_name = str_replace_all(
-      enum_name,
-      c(
-        "Abidulahi mohammed" = "Abidulahi",
-        "Addis Worku" = "Addis",
-        "Aklilu Zewde Birhane" = "Aklilu",
-        "Atakilit Tadesse" = "Atakilit",
-        "Bruktawit Molla" = "Bruktawit",
-        "Daniel Abebaw" = "Daniel",
-        "Eyerus halfom" = "Eyerus",
-        "Hilariy Girmay" = "Hilariy",
-        "Kabtamu Alemayehu" = "Kabtamu",
-        "Kalkidan Wondatir" = "Kalkidan",
-        "Mariyam Gudeta" = "Mariyam",
-        "Ruth Asfaw" = "Ruth",
-        "Shewakena Damitew" = "Shewakena",
-        "Sitota G/melak" = "Sitota",
-        "Tadele Ejo" = "Tadele",
-        "Tena tesfaye" = "Tena",
-        "Tirsit Seyoum" = "Tirsit",
-        "Tirunesh Ajema" = "Tirunesh",
-        "Urgessa Mekonnen" = "Urgessa",
-        "Fikadu Thomas" = "Fikadu",
-        "Yakob Debela" = "Yakob"
-      )
-    )
-  )
-
-```
-
 ATA PHONE SURVEY
 =====================================
 Row
 -----------------------------------------------------------------------
 
+### TOTAL ATA FARMER HOTLINE PHONE SURVEY CONDUCTED INTERVIEWS
+
+```{r}
+total_interview<-nrow(datapse)
+valueBox(total_interview, icon = "fa-bar-chart")
+```
 
 ### TOTAL SYNCED ELIGABLE ATA FARMER HOTLINE PHONE SURVEY INTERVIEWS
 
@@ -177,12 +142,12 @@ library(dplyr)
 library(highcharter)
 
 dataps %>% 
-  filter(!is.na(supervisor_name)) %>% 
-  count(supervisor_name) %>% 
+  filter(!is.na(supervisor)) %>% 
+  count(supervisor) %>% 
   arrange(desc(n)) %>% 
   mutate(
-    supervisor_name = factor(supervisor_name, levels = supervisor_name),
-    name = supervisor_name,
+    supervisor = factor(supervisor, levels = supervisor),
+    name = supervisor,
     y = n
   ) %>% 
   hchart(
@@ -378,11 +343,11 @@ library(dplyr)
 library(highcharter)
 
 dataps %>% 
-  count(region) %>%
+  count(region_preload) %>%
   arrange(desc(n)) %>% 
   mutate(
-    region = factor(region, levels = region),
-    name = region,
+    region = factor(region_preload, levels = region_preload),
+    name = region_preload,
     y = n
   ) %>%
   hchart(
