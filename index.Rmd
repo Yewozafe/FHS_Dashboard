@@ -35,9 +35,9 @@ dataps <- read_dta(
   "D:/Econsight/Dashboard/WB Farmer Hotline Screening Phone_Survey/Raw Data/Eligible_ATI_Farmer_Hotline_phone_survey_500_Callers.dta"
 )
 
-dataps <- datapse %>% mutate(across(where(is.labelled), as_factor))
+dataps <- dataps %>% mutate(across(where(is.labelled), as_factor))
 
-dataps <- datapse %>%
+dataps <- dataps %>%
   rename(
     region        = region_preload,
     supervisor_name = supervisor,
@@ -46,10 +46,10 @@ dataps <- datapse %>%
   select(-consent) %>%
   rename(consent = consent1)
 
-dataps <- datapse %>%
+dataps <- dataps %>%
   mutate(
-    supervisor = str_replace_all(
-      supervisor,
+    supervisor_name = str_replace_all(
+      supervisor_name,
       c(
         "Shambel Awgachew" = "Shambel",
         "Jemila Umar" = "Jemila",
@@ -142,12 +142,12 @@ library(dplyr)
 library(highcharter)
 
 dataps %>% 
-  filter(!is.na(supervisor)) %>% 
-  count(supervisor) %>% 
+  filter(!is.na(supervisor_name)) %>% 
+  count(supervisor_name) %>% 
   arrange(desc(n)) %>% 
   mutate(
-    supervisor = factor(supervisor, levels = supervisor),
-    name = supervisor,
+    supervisor_name = factor(supervisor_name, levels = supervisor_name),
+    name = supervisor_name,
     y = n
   ) %>% 
   hchart(
@@ -343,11 +343,11 @@ library(dplyr)
 library(highcharter)
 
 dataps %>% 
-  count(region_preload) %>%
+  count(region) %>%
   arrange(desc(n)) %>% 
   mutate(
-    region = factor(region_preload, levels = region_preload),
-    name = region_preload,
+    region = factor(region, levels = region),
+    name = region,
     y = n
   ) %>%
   hchart(
